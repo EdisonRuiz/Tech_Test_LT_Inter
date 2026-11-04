@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="TestInter.Application/TestInter.Application.csproj" />
+  <Project Path="TestInter.Domain/TestInter.Domain.csproj" />
+  <Project Path="TestInter.Infrastructure/TestInter.Infrastructure.csproj" />
+  <Project Path="TestInter.Tests.Integration/TestInter.Tests.Integration.csproj" />
+  <Project Path="TestInter.Tests.Unit/TestInter.Tests.Unit.csproj" />
+  <Project Path="TestInter/TestInter.csproj" />
+</Solution>

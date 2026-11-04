@@ -1,0 +1,94 @@
+@TestInter_HostAddress = http://localhost:5192
+@token = 
+@createdStudentId = 
+
+### Login (JWT)
+@name login
+POST {{TestInter_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "Email": "student1@school.com",
+  "Password": "Pass123!"
+}
+
+### List catalog courses
+GET {{TestInter_HostAddress}}/api/courses
+Authorization: Bearer {{token}}
+Accept: application/json
+
+
+### Create student registration (exactly 3 courses, different teachers)
+POST {{TestInter_HostAddress}}/api/students
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "John Carter",
+  "email": "john.carter@school.com",
+  "password": "Pass123!",
+  "courseIds": [
+    "20000000-0000-0000-0000-000000000002",
+    "20000000-0000-0000-0000-000000000003",
+    "20000000-0000-0000-0000-000000000005"
+  ]
+}
+
+# Set @createdStudentId manually with the returned id before calling requests that use /api/students/{{createdStudentId}}.
+### List students
+GET {{TestInter_HostAddress}}/api/students
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get student by id
+GET {{TestInter_HostAddress}}/api/students/{{createdStudentId}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Update student
+PUT {{TestInter_HostAddress}}/api/students/8669af69-0842-4561-8579-6b8de7f9319b
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NjY5YWY2OS0wODQyLTQ1NjEtODU3OS02YjhkZTdmOTMxOWIiLCJlbWFpbCI6InN0dWRlbnQxQHNjaG9vbC5jb20iLCJuYW1lIjoiQ2FybG9zIEFtcGFybyIsImV4cCI6MTc5MzgxMDEzNywiaXNzIjoiVGVzdEludGVyLkFwaSIsImF1ZCI6IlRlc3RJbnRlci5DbGllbnQifQ.4ggqpIAEuPQfDfuUtEokwIizZxOnkmefu3Ao_ppnyNo
+Content-Type: application/json
+
+{
+  "fullName": "John Carter Updated",
+  "courseIds": [
+    "20000000-0000-0000-0000-000000000001",
+    "20000000-0000-0000-0000-000000000004",
+    "20000000-0000-0000-0000-000000000007"
+  ]
+}
+
+### Enrollment summary of all students
+GET {{TestInter_HostAddress}}/api/students/enrollments
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NjY5YWY2OS0wODQyLTQ1NjEtODU3OS02YjhkZTdmOTMxOWIiLCJlbWFpbCI6InN0dWRlbnQxQHNjaG9vbC5jb20iLCJuYW1lIjoiQ2FybG9zIEFtcGFybyIsImV4cCI6MTc5MzgyODA2NCwiaXNzIjoiVGVzdEludGVyLkFwaSIsImF1ZCI6IlRlc3RJbnRlci5DbGllbnQifQ.yxbu7NMRJYrnFs1L71ceJL_VhBy3MqxROCrsBbtiut4
+Accept: application/json
+
+### My courses with classmates full names
+GET {{TestInter_HostAddress}}/api/students/me/courses
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMjU5NGZhMS0yZDQ4LTRlM2EtYjFkOC03NjRhY2E3MjUxMDEiLCJlbWFpbCI6ImpvaG4uY2FydGVyQHNjaG9vbC5jb20iLCJuYW1lIjoiSm9obiBDYXJ0ZXIgVXBkYXRlZCIsImV4cCI6MTc5MzgyODY0MCwiaXNzIjoiVGVzdEludGVyLkFwaSIsImF1ZCI6IlRlc3RJbnRlci5DbGllbnQifQ.dEbAmgoi944PDDTHpVzlEF4gJ6uS8ZHlQ4-kjWDi9qw
+Accept: application/json
+
+### Delete student
+DELETE {{TestInter_HostAddress}}/api/students/{{createdStudentId}}
+Authorization: Bearer {{token}}
+
+### Invalid registration to force domain exception (2 courses)
+POST {{TestInter_HostAddress}}/api/students
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NjY5YWY2OS0wODQyLTQ1NjEtODU3OS02YjhkZTdmOTMxOWIiLCJlbWFpbCI6InN0dWRlbnQxQHNjaG9vbC5jb20iLCJuYW1lIjoiQ2FybG9zIEFtcGFybyIsImV4cCI6MTc5MzgzMDQwMCwiaXNzIjoiVGVzdEludGVyLkFwaSIsImF1ZCI6IlRlc3RJbnRlci5DbGllbnQifQ.PI7hcFVgCOsLaFz60I1dZuU6YqU02T1yCEAaDRLY_Ec
+Content-Type: application/json
+
+{
+  "fullName": "Invalid Student",
+  "email": "invalid.student@school.com",
+  "password": "Pass123!",
+  "courseIds": [
+    "20000000-0000-0000-0000-000000000001",
+    "20000000-0000-0000-0000-000000000003"
+  ]
+}
+
+### Read log by logId from previous error response
+GET {{TestInter_HostAddress}}/api/logs/cc6f35b8-dada-40b7-b05b-cb31a44c6511
+Authorization: Bearer {{token}}
+Accept: application/json
