@@ -1,8 +1,8 @@
 <Solution>
-  <Project Path="Back/TestInter.Application/TestInter.Application.csproj" />
-  <Project Path="Back/TestInter.Domain/TestInter.Domain.csproj" />
-  <Project Path="Back/TestInter.Infrastructure/TestInter.Infrastructure.csproj" />
-  <Project Path="Back/TestInter.Tests.Integration/TestInter.Tests.Integration.csproj" />
-  <Project Path="Back/TestInter.Tests.Unit/TestInter.Tests.Unit.csproj" />
-  <Project Path="Back/TestInter/TestInter.csproj" />
+  <Project Path="TestInter.Application/TestInter.Application.csproj" />
+  <Project Path="TestInter.Domain/TestInter.Domain.csproj" />
+  <Project Path="TestInter.Infrastructure/TestInter.Infrastructure.csproj" />
+  <Project Path="TestInter.Tests.Integration/TestInter.Tests.Integration.csproj" />
+  <Project Path="TestInter.Tests.Unit/TestInter.Tests.Unit.csproj" />
+  <Project Path="TestInter/TestInter.csproj" />
 </Solution>
