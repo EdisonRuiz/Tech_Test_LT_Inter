@@ -12,10 +12,21 @@ using TestInter.Middleware;
 using InfrastructureDI = TestInter.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+const string localWebCorsPolicy = "LocalWebCors";
 
 builder.Services.AddOpenApi();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(localWebCorsPolicy, policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -35,6 +46,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors(localWebCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 
