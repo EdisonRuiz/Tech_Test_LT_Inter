@@ -130,7 +130,7 @@ export class LoginComponent {
           }
 
           this.notifications.success('Bienvenido', 'Has iniciado sesión correctamente.');
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/courses';
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/my-courses';
           void this.router.navigateByUrl(returnUrl);
         },
         error: (err: NormalizedApiError) => {

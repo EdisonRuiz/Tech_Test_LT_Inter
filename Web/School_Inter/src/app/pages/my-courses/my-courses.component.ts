@@ -3,12 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { StudentService } from '../../services/student.service';
 import { AuthService } from '../../services/auth.service';
-import { MyCourseClassmate, MyCourseItem } from '../../types/api.types';
+import { MyCourseClassmate, MyCourseItem, NormalizedApiError } from '../../types/api.types';
+import { StudentEditorComponent } from '../../components/student-editor/student-editor.component';
 
 @Component({
   selector: 'app-my-courses',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, StudentEditorComponent],
   template: `
     <div class="page-container">
       <div class="page-header-row">
@@ -64,13 +65,25 @@ import { MyCourseClassmate, MyCourseItem } from '../../types/api.types';
 
       @if (loading()) {
         <div class="card empty-state">Consultando tus clases y compañeros...</div>
+      } @else if (loadError()) {
+        <div class="alert alert-error" role="alert">
+          <span>{{ loadError() }}</span>
+          <button type="button" class="btn btn-secondary" (click)="loadMyCourses()">Reintentar</button>
+        </div>
       } @else if (filteredCourses().length === 0) {
         <div class="card empty-state">
-          <h3>No se encontraron materias inscritas</h3>
-          <p>
-            Aún no registras materias asociadas a tu perfil o el filtro de búsqueda no coincide con tus clases.
-          </p>
-          <a routerLink="/courses" class="btn btn-primary">Explorar Materias Disponibles</a>
+          @if (myCourses().length === 0) {
+            <h3>No se encontraron materias inscritas</h3>
+            <p>Aún no registras materias asociadas a tu perfil.</p>
+            @if (enrollmentError()) {
+              <p class="field-error" role="alert">{{ enrollmentError() }}</p>
+            }
+            <button type="button" class="btn btn-primary" (click)="openEnrollment()">Matricular</button>
+          } @else {
+            <h3>No se encontraron coincidencias</h3>
+            <p>El filtro de búsqueda no coincide con tus clases.</p>
+            <button type="button" class="btn btn-secondary" (click)="searchTerm.set('')">Limpiar filtro</button>
+          }
         </div>
       } @else {
         <div class="my-courses-grid">
@@ -113,6 +126,11 @@ import { MyCourseClassmate, MyCourseItem } from '../../types/api.types';
           }
         </div>
       }
+
+      @if (enrollmentStudentId(); as studentId) {
+        <app-student-editor [studentId]="studentId" [enrollmentOnly]="true"
+          (closed)="enrollmentStudentId.set(null)" (saved)="onEnrolled()" />
+      }
     </div>
   `,
 })
@@ -123,6 +141,9 @@ export class MyCoursesComponent implements OnInit {
   readonly myCourses = signal<MyCourseItem[]>([]);
   readonly loading = signal(false);
   readonly searchTerm = signal('');
+  readonly loadError = signal<string | null>(null);
+  readonly enrollmentError = signal<string | null>(null);
+  readonly enrollmentStudentId = signal<string | null>(null);
 
   readonly totalCredits = computed(() =>
     this.myCourses().reduce((acc, item) => acc + (item.credits || 3), 0)
@@ -158,15 +179,36 @@ export class MyCoursesComponent implements OnInit {
 
   loadMyCourses(): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.studentService.getMyCourses().subscribe({
       next: (items) => {
         this.myCourses.set(items);
         this.loading.set(false);
       },
-      error: () => {
+      error: (error: NormalizedApiError) => {
         this.loading.set(false);
+        this.loadError.set(error?.message || 'No se pudieron consultar tus clases.');
       },
     });
+  }
+
+  openEnrollment(): void {
+    if (this.loading() || this.loadError() || this.myCourses().length > 0) {
+      return;
+    }
+    this.enrollmentError.set(null);
+    const studentId = this.authService.currentUser()?.id;
+    if (!studentId) {
+      this.enrollmentError.set('No se pudo identificar tu perfil. Vuelve a iniciar sesion.');
+      return;
+    }
+    this.enrollmentStudentId.set(studentId);
+  }
+
+  onEnrolled(): void {
+    this.enrollmentStudentId.set(null);
+    this.searchTerm.set('');
+    this.loadMyCourses();
   }
 
   getClassmateNames(course: MyCourseItem): string[] {

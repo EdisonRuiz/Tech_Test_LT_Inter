@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { StudentService } from '../../services/student.service';
 import { CourseService } from '../../services/course.service';
@@ -7,19 +7,15 @@ import { NotificationService } from '../../services/notification.service';
 import {
   Course,
   Enrollment,
-  NormalizedApiError,
   Student,
   StudentCourseSummary,
 } from '../../types/api.types';
-import {
-  resolveProfessorName,
-  useCourseSelectionValidator,
-} from '../../hooks/use-course-selection';
+import { StudentEditorComponent } from '../../components/student-editor/student-editor.component';
 
 @Component({
   selector: 'app-students',
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, StudentEditorComponent],
   template: `
     <div class="page-container">
       <div class="page-header-row">
@@ -293,105 +289,8 @@ import {
 
       <!-- MODAL: Editar Estudiante (PUT /api/students/{id}) -->
       @if (editingStudent(); as editing) {
-        <div class="modal-backdrop" (click)="closeEditModal()">
-          <div class="modal-card modal-lg" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-              <div>
-                <span class="eyebrow">Actualizar Registro</span>
-                <h2 class="section-title">Editar Estudiante</h2>
-              </div>
-              <button type="button" class="toast-close" (click)="closeEditModal()">×</button>
-            </div>
-
-            @if (modalErrorLogId()) {
-              <div class="alert alert-error">
-                <span>Ocurrió una excepción de dominio al actualizar.</span>
-                <a
-                  [routerLink]="['/logs', modalErrorLogId()]"
-                  class="alert-link"
-                  (click)="closeEditModal()"
-                >
-                  Ver Log {{ modalErrorLogId() }} →
-                </a>
-              </div>
-            }
-
-            <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="form-stack">
-              <div class="form-field">
-                <label for="editFullName">Nombre completo</label>
-                <input
-                  id="editFullName"
-                  type="text"
-                  formControlName="fullName"
-                  placeholder="Nombre completo del estudiante"
-                />
-              </div>
-
-              <div
-                class="validation-panel"
-                [class.validation-ok]="editCourseSelection.isValidSelection()"
-                [class.validation-warn]="!editCourseSelection.isValidSelection()"
-              >
-                <div class="validation-header">
-                  <span class="badge-counter">
-                    {{ editCourseSelection.selectedCount() }} / 3 Materias seleccionadas
-                  </span>
-                  @if (editCourseSelection.isValidSelection()) {
-                    <span class="status-pill status-ok">3 profesores distintos</span>
-                  } @else {
-                    <span class="status-pill status-warn">Selecciona 3 materias válidas</span>
-                  }
-                </div>
-                <p class="validation-text">{{ editCourseSelection.validationMessage() }}</p>
-              </div>
-
-              <div class="course-selector-grid compact-grid">
-                @for (course of courses(); track course.id) {
-                  @let selected = editCourseSelection.isSelected(course.id);
-                  @let conflict = editCourseSelection.isProfessorConflict(course);
-                  @let maxReached = !selected && editCourseSelection.selectedCount() >= 3;
-
-                  <button
-                    type="button"
-                    class="course-select-card"
-                    [class.selected]="selected"
-                    [class.conflict]="conflict"
-                    [class.disabled]="conflict || maxReached"
-                    (click)="onToggleEditCourse(course)"
-                  >
-                    <div class="course-select-top">
-                      <span class="course-credits">{{ course.credits || 3 }} cr.</span>
-                      @if (selected) {
-                        <span class="course-state-badge badge-selected">Activa</span>
-                      } @else if (conflict) {
-                        <span class="course-state-badge badge-conflict">Mismo prof.</span>
-                      }
-                    </div>
-                    <h4 class="course-select-name">{{ course.name }}</h4>
-                    <p class="course-select-prof">Prof. {{ getProfessorName(course) }}</p>
-                  </button>
-                }
-              </div>
-
-              <div class="modal-footer">
-                <button type="button" class="btn btn-ghost" (click)="closeEditModal()">
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  class="btn btn-primary"
-                  [disabled]="savingEdit() || editForm.invalid || !editCourseSelection.isValidSelection()"
-                >
-                  @if (savingEdit()) {
-                    <span>Guardando cambios...</span>
-                  } @else {
-                    <span>Guardar Cambios</span>
-                  }
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <app-student-editor [studentId]="editing.id"
+          (closed)="closeEditModal()" (saved)="onStudentSaved()" />
       }
 
       <!-- MODAL: Confirmar Eliminación (DELETE /api/students/{id}) -->
@@ -438,7 +337,6 @@ export class StudentsComponent implements OnInit {
   private readonly studentService = inject(StudentService);
   private readonly courseService = inject(CourseService);
   private readonly notifications = inject(NotificationService);
-  private readonly fb = inject(FormBuilder);
 
   readonly activeTab = signal<'students' | 'enrollments'>('students');
   readonly students = signal<Student[]>([]);
@@ -448,7 +346,6 @@ export class StudentsComponent implements OnInit {
   readonly loadingStudents = signal(false);
   readonly loadingEnrollments = signal(false);
   readonly loadingDetail = signal(false);
-  readonly savingEdit = signal(false);
   readonly deleting = signal(false);
 
   readonly studentQuery = signal('');
@@ -457,13 +354,6 @@ export class StudentsComponent implements OnInit {
   readonly detailStudent = signal<Student | null>(null);
   readonly editingStudent = signal<Student | null>(null);
   readonly deletingStudent = signal<Student | null>(null);
-  readonly modalErrorLogId = signal<string | null>(null);
-
-  readonly editCourseSelection = useCourseSelectionValidator(this.courses);
-
-  readonly editForm = this.fb.nonNullable.group({
-    fullName: ['', [Validators.required, Validators.minLength(3)]],
-  });
 
   readonly filteredStudents = computed(() => {
     const q = this.studentQuery().trim().toLowerCase();
@@ -540,10 +430,6 @@ export class StudentsComponent implements OnInit {
     });
   }
 
-  getProfessorName(course: Course): string {
-    return resolveProfessorName(course);
-  }
-
   getStudentCourseLabels(student: Student): string[] {
     if (student.courses && student.courses.length > 0) {
       return student.courses.map((item) => this.formatCourseSummary(item));
@@ -588,74 +474,16 @@ export class StudentsComponent implements OnInit {
   }
 
   openEditModal(student: Student): void {
-    this.modalErrorLogId.set(null);
     this.editingStudent.set(student);
-    this.editForm.patchValue({
-      fullName: student.fullName,
-    });
-
-    const initialIds = this.resolveStudentCourseIds(student);
-    this.editCourseSelection.setSelectedIds(initialIds);
-
-    this.studentService.getStudentById(student.id).subscribe({
-      next: (detailed) => {
-        this.editingStudent.set(detailed);
-        this.editForm.patchValue({ fullName: detailed.fullName });
-        const freshIds = this.resolveStudentCourseIds(detailed);
-        if (freshIds.length > 0) {
-          this.editCourseSelection.setSelectedIds(freshIds);
-        }
-      },
-      error: () => {},
-    });
   }
 
   closeEditModal(): void {
     this.editingStudent.set(null);
-    this.modalErrorLogId.set(null);
   }
 
-  onToggleEditCourse(course: Course): void {
-    const result = this.editCourseSelection.toggleCourse(course);
-    if (!result.changed && result.reason) {
-      this.notifications.warning('Regla de selección', result.reason);
-    }
-  }
-
-  submitEdit(): void {
-    const target = this.editingStudent();
-    if (!target || this.editForm.invalid || !this.editCourseSelection.isValidSelection()) {
-      return;
-    }
-
-    this.savingEdit.set(true);
-    this.modalErrorLogId.set(null);
-
-    const fullName = this.editForm.controls.fullName.value.trim();
-    const courseIds = this.editCourseSelection.selectedIds();
-
-    this.studentService
-      .updateStudent(target.id, {
-        fullName,
-        courseIds,
-      })
-      .subscribe({
-        next: () => {
-          this.savingEdit.set(false);
-          this.notifications.success(
-            'Estudiante actualizado',
-            `Se actualizaron los datos y materias de ${fullName}.`
-          );
-          this.closeEditModal();
-          this.refreshAll();
-        },
-        error: (err: NormalizedApiError) => {
-          this.savingEdit.set(false);
-          if (err?.logId) {
-            this.modalErrorLogId.set(err.logId);
-          }
-        },
-      });
+  onStudentSaved(): void {
+    this.closeEditModal();
+    this.refreshAll();
   }
 
   openDeleteModal(student: Student): void {
@@ -689,39 +517,4 @@ export class StudentsComponent implements OnInit {
     });
   }
 
-  private resolveStudentCourseIds(student: Student): string[] {
-    if (student.courseIds && student.courseIds.length > 0) {
-      return [...student.courseIds];
-    }
-
-    if (student.courses && student.courses.length > 0) {
-      const catalog = this.courses();
-      const matched: string[] = [];
-
-      for (const item of student.courses) {
-        if (typeof item === 'string') {
-          const byName = catalog.find((c) => c.name.toLowerCase() === item.toLowerCase());
-          if (byName) {
-            matched.push(byName.id);
-          }
-        } else {
-          const id = item.id || (item as StudentCourseSummary).courseId;
-          const name = item.name || (item as StudentCourseSummary).courseName;
-          const byId = id ? catalog.find((c) => c.id === id) : undefined;
-          if (byId) {
-            matched.push(byId.id);
-          } else if (name) {
-            const byName = catalog.find((c) => c.name.toLowerCase() === name.toLowerCase());
-            if (byName) {
-              matched.push(byName.id);
-            }
-          }
-        }
-      }
-
-      return matched.slice(0, 3);
-    }
-
-    return [];
-  }
 }
