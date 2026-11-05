@@ -343,3 +343,95 @@ Permite recuperar la traza completa de un error registrado en archivo a partir d
 
 - **HTTPS redirection:** habilitado en el pipeline mediante `app.UseHttpsRedirection()`.
 - **Política CORS (`LocalWebCors`):** restringe los orígenes permitidos exclusivamente al frontend local en `http://localhost:4200` (permitiendo cualquier método y cabecera desde dicho origen).
+
+
+# Funcionalidades de School Inter
+
+School Inter es un portal académico para consultar materias, administrar perfiles estudiantiles y gestionar matrículas. La interfaz se comunica con una API para cargar y actualizar la información.
+
+## Acceso y navegación
+
+| Pantalla | Ruta | Acceso |
+| --- | --- | --- |
+| Inicio de sesión | `/login` | Visitantes; si ya iniciaron sesión, se redirigen al catálogo |
+| Registro de estudiante | `/register` | Disponible sin iniciar sesión; también se usa para crear estudiantes desde la gestión administrativa |
+| Catálogo de materias | `/courses` | Usuarios autenticados |
+| Mis clases y compañeros | `/my-courses` | Usuarios autenticados |
+| Gestión de estudiantes | `/students` | Administradores |
+| Detalle de log | `/logs` o `/logs/:logId` | Administradores |
+
+La ruta inicial (`/`) redirige al catálogo. Si una persona sin sesión intenta abrir una pantalla protegida, se le envía al inicio de sesión y, al autenticarse, puede volver a la ruta que solicitó. Los usuarios autenticados que no son administradores se dirigen al catálogo cuando intentan abrir una pantalla administrativa.
+
+La sesión usa un token JWT y la información básica del usuario se conserva en el almacenamiento local del navegador. La aplicación determina el acceso administrativo a partir del claim `sid` con valor `Admin`. La barra de navegación cambia según la sesión y el rol; permite cerrar sesión y, para administradores, acceder a estudiantes y logs.
+
+## Pantallas principales
+
+### Inicio de sesión
+<img width="1791" height="971" alt="Login" src="https://github.com/user-attachments/assets/50d57618-643d-4e2b-8482-5f9a2d20fa52" />
+
+- Solicita correo electrónico y contraseña, con validación de campos obligatorios y formato de correo.
+- Envía las credenciales a la API y comprueba que la respuesta contenga un token JWT válido.
+- Tras iniciar sesión, redirige a la URL solicitada originalmente o, por defecto, a «Mis clases y compañeros».
+- Muestra errores de autenticación y ofrece abrir el log asociado cuando la API devuelve un identificador.
+- Enlaza al registro de estudiante.
+
+### Registro de estudiante
+
+- Crea un perfil con nombre completo, correo institucional y contraseña.
+- Valida que el nombre tenga al menos 3 caracteres, que el correo sea válido y que la contraseña tenga al menos 6 caracteres.
+- Informa el resultado mediante notificaciones. Al completar el registro, envía a usuarios autenticados a la gestión de estudiantes y a visitantes al inicio de sesión.
+- Si la API asocia un identificador de log al error, permite consultar su detalle.
+
+### Catálogo de materias
+<img width="1701" height="1013" alt="Menu estudiante" src="https://github.com/user-attachments/assets/084da3dd-e0b1-473c-88b6-d23f48c9c758" />
+
+- Consulta y muestra las materias disponibles, con nombre, descripción cuando existe, créditos, profesor e identificador.
+- Permite buscar por nombre de materia, profesor o identificador, y filtrar por profesor.
+- Presenta los resultados como tarjetas o tabla y permite actualizar el catálogo.
+- Incluye un acceso a «Mis clases y compañeros».
+
+### Mis clases y compañeros
+
+- Muestra las materias asociadas al perfil, el total de materias, los créditos y el número de compañeros únicos.
+- Permite buscar por materia, profesor o compañero, actualizar los datos y volver al catálogo.
+- Presenta cada materia con su profesor y los compañeros inscritos; indica cuando una materia no tiene otros estudiantes inscritos.
+- Si el perfil aún no tiene materias, permite abrir el flujo de matrícula. Después de guardar, vuelve a cargar la información.
+- Si no se pueden consultar las clases, muestra el error y ofrece reintentar.
+
+### Gestión de estudiantes
+<img width="1707" height="1056" alt="Materias" src="https://github.com/user-attachments/assets/68ae20ff-cc29-444d-9af3-70680f634fdc" />
+La pantalla administrativa tiene dos vistas:
+
+- **Estudiantes:** directorio con búsqueda por nombre, correo o identificador. Muestra créditos y materias, y permite abrir el detalle, editar o eliminar un perfil.
+- **Resumen de matriculación:** registros con datos de estudiante, materias, profesores, créditos y fecha cuando está disponible. Se puede filtrar por estudiante, correo, materia o profesor.
+- **Detalle:** consulta la información actual del estudiante y sus materias antes de editar.
+- **Nuevo estudiante:** abre el formulario de registro.
+- **Eliminar:** solicita confirmación antes de enviar la eliminación; la interfaz indica que también se retiran las matrículas asociadas.
+- **Actualizar datos:** vuelve a consultar estudiantes, matrículas y materias.
+
+Al editar un estudiante o matricularlo, se pueden seleccionar como máximo tres materias y no se permiten dos materias con el mismo profesor. Para guardar, la selección debe contener exactamente tres materias con profesores distintos. El formulario de matrícula del estudiante solo se ofrece cuando su perfil todavía no tiene materias.
+
+### Visor de logs
+
+- Permite consultar un log por su identificador, ya sea desde `/logs/:logId` o ingresándolo en el buscador.
+- Muestra nivel, mensaje, fecha y hora, endpoint, método, código HTTP, detalle de la excepción, stack trace y el payload JSON completo, cuando esos datos existen.
+- Informa cuando el log no se puede recuperar. Los errores que incluyen un `logId` pueden enlazar directamente a esta pantalla desde los formularios o las notificaciones.
+
+## Reglas y comportamiento común
+
+- Las materias y los datos de estudiantes se obtienen de la API; el portal no mantiene un catálogo local independiente.
+- La interfaz muestra estados de carga, resultados vacíos y errores en las consultas principales.
+- Las operaciones exitosas muestran notificaciones emergentes que se pueden cerrar. Cuando una notificación contiene un identificador de log, incluye un enlace a su detalle.
+- En la selección de materias, los créditos se muestran desde los datos de la API; si no vienen informados, la interfaz usa 3 como valor predeterminado. La regla de selección valida cantidad de materias y profesores distintos.
+
+## Dependencia de la API
+
+La URL base de la API está definida actualmente como `http://localhost:5192` en `src/app/types/api.types.ts`. Las pantallas usan, entre otros, estos recursos:
+
+- `POST /api/auth/login` para iniciar sesión.
+- `GET /api/courses` para consultar materias.
+- `GET`, `POST`, `PUT` y `DELETE /api/students` para consultar y administrar estudiantes.
+- `GET /api/students/enrollments` y `GET /api/students/me/courses` para consultar matrículas y clases propias.
+- `GET /api/logs/{logId}` para consultar detalles de logs.
+
+Para que las consultas y operaciones funcionen, la API debe estar disponible en la URL configurada y permitir las solicitudes del origen de la aplicación.
