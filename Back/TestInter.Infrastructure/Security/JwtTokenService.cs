@@ -21,12 +21,15 @@ public sealed class JwtTokenService : ITokenService
     public (string Token, DateTimeOffset ExpiresAt) GenerateToken(Student student)
     {
         var expiresAt = DateTimeOffset.UtcNow.AddMinutes(_jwtOptions.ExpirationMinutes);
-        var claims = new List<Claim>
+        List<Claim> claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, student.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, student.Email.Value),
             new(JwtRegisteredClaimNames.Name, student.FullName)
         };
+
+        if(student.Email.Value == _jwtOptions.RoleUser)
+            claims.Add(new Claim(JwtRegisteredClaimNames.Sid, _jwtOptions.RoleAdmin));
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.SecretKey));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
