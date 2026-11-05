@@ -12,24 +12,24 @@ public static class CatalogSeed
 
     public static readonly IReadOnlyCollection<Teacher> Teachers =
     [
-        new Teacher(Teacher1Id, "Alice Johnson"),
-        new Teacher(Teacher2Id, "Bob Smith"),
-        new Teacher(Teacher3Id, "Carol White"),
-        new Teacher(Teacher4Id, "David Brown"),
-        new Teacher(Teacher5Id, "Eve Miller")
+        new Teacher(Teacher1Id, "Mauricio Otalora"),
+        new Teacher(Teacher2Id, "Laureano Quintero"),
+        new Teacher(Teacher3Id, "Yeison Bermudez"),
+        new Teacher(Teacher4Id, "John Oswaldo"),
+        new Teacher(Teacher5Id, "Miguel Castilla")
     ];
 
     public static readonly IReadOnlyCollection<Course> Courses =
     [
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000001"), "Mathematics I", 3, Teacher1Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000002"), "Physics I", 3, Teacher1Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000003"), "Chemistry", 3, Teacher2Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000004"), "Biology", 3, Teacher2Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000005"), "Literature", 3, Teacher3Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000006"), "History", 3, Teacher3Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000007"), "Programming", 3, Teacher4Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000008"), "Databases", 3, Teacher4Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000009"), "Philosophy", 3, Teacher5Id),
-        new Course(Guid.Parse("20000000-0000-0000-0000-000000000010"), "Economics", 3, Teacher5Id)
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000001"), "Matematicas I", 3, Teacher1Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000002"), "Fisica I", 3, Teacher1Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000003"), "Quimica", 3, Teacher2Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000004"), "Biologia", 3, Teacher2Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000005"), "Literatura", 3, Teacher3Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000006"), "Historia", 3, Teacher3Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000007"), "Programacion", 3, Teacher4Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000008"), "Bases de Datos", 3, Teacher4Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000009"), "Filosofia", 3, Teacher5Id),
+        new Course(Guid.Parse("20000000-0000-0000-0000-000000000010"), "Economia", 3, Teacher5Id)
     ];
 }

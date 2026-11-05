@@ -13,7 +13,6 @@ import { NormalizedApiError } from '../../types/api.types';
     <div class="auth-page">
       <div class="card auth-card">
         <div class="card-header">
-          <span class="eyebrow">Acceso al Sistema</span>
           <h1 class="page-title">Iniciar Sesión</h1>
           <p class="page-subtitle">
             Ingresa tus credenciales académicas para gestionar tus materias y compañeros.

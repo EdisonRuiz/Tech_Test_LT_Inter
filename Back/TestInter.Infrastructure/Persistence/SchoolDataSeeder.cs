@@ -27,7 +27,7 @@ public sealed class SchoolDataSeeder
 
         var student = new Student(
             Guid.Parse("30000000-0000-0000-0000-000000000001"),
-            "Default Student",
+            "Edison Ruiz",
             new EmailAddress("student1@school.com"),
             _passwordHasher.Hash("Pass123!"));
 

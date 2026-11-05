@@ -55,11 +55,8 @@ export class CourseService {
       const professorObj = record['professor'] as Record<string, unknown> | string | undefined;
 
       const professorName =
-        (record['professorName'] as string | undefined) ||
-        (record['ProfessorName'] as string | undefined) ||
-        (record['teacherName'] as string | undefined) ||
-        (record['TeacherName'] as string | undefined) ||
-        (record['instructor'] as string | undefined) ||
+        (record['teacherFullName'] as string | undefined) ||
+        (record['TeacherFullName'] as string | undefined) ||
         (typeof professorObj === 'string'
           ? professorObj
           : (professorObj?.['fullName'] as string | undefined) ||

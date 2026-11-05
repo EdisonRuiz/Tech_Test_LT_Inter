@@ -227,6 +227,8 @@ export class StudentService {
     return rawList.map((entry, idx) => {
       const rec = (entry ?? {}) as Record<string, unknown>;
       const classmatesRaw =
+        (rec['classmatesFullNames'] as unknown[]) ??
+        (rec['ClassmatesFullNames'] as unknown[]) ??
         (rec['classmates'] as unknown[]) ??
         (rec['Classmates'] as unknown[]) ??
         (rec['students'] as unknown[]) ??
@@ -270,7 +272,9 @@ export class StudentService {
             `Materia ${idx + 1}`
         ),
         professorName: String(
-          rec['professorName'] ??
+          rec['teacherFullName'] ??
+            rec['TeacherFullName'] ??
+            rec['professorName'] ??
             rec['ProfessorName'] ??
             rec['teacherName'] ??
             rec['TeacherName'] ??
