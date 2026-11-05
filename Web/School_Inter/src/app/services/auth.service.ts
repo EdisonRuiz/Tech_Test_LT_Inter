@@ -32,6 +32,11 @@ export class AuthService {
     return !this.isTokenExpired(rawToken);
   });
 
+  readonly isAdmin = computed(() => {
+    const token = this.token();
+    return this.isAuthenticated() && !!token && this.decodeJwtClaims(token)['sid'] === 'Admin';
+  });
+
   login(payload: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${API_BASE_URL}/api/auth/login`, payload).pipe(
       tap((response) => {

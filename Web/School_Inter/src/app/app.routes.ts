@@ -36,6 +36,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/students/students.component').then((m) => m.StudentsComponent),
   },
   {
+    path: 'logs',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/log-detail/log-detail.component').then((m) => m.LogDetailComponent),
+  },
+  {
     path: 'logs/:logId',
     canActivate: [authGuard],
     loadComponent: () => import('./pages/log-detail/log-detail.component').then((m) => m.LogDetailComponent),

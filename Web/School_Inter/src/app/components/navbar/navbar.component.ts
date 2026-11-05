@@ -64,15 +64,25 @@ import { NotificationService } from '../../services/notification.service';
             >
               Mis Clases y Compañeros
             </a>
-            <a
-              routerLink="/students"
-              routerLinkActive="active"
-              (click)="closeMobileMenu()"
-              class="nav-item"
-            >
-              Gestión de Estudiantes
-            </a>
-            <a
+            @if (authService.isAdmin()) {
+              <a
+                routerLink="/students"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                (click)="closeMobileMenu()"
+                class="nav-item"
+              >
+                Gestión de Estudiantes
+              </a>
+              <a
+                routerLink="/logs"
+                routerLinkActive="active"
+                (click)="closeMobileMenu()"
+                class="nav-item"
+              >
+                LOG
+              </a>
+              <a
               routerLink="/students/create"
               routerLinkActive="active"
               (click)="closeMobileMenu()"
@@ -80,8 +90,10 @@ import { NotificationService } from '../../services/notification.service';
             >
               Nuevo Estudiante
             </a>
+            }           
 
-            @if (notifications.lastLogId(); as lastLogId) {
+            @if (authService.isAdmin()) {
+              @if (notifications.lastLogId(); as lastLogId) {
               <a
                 [routerLink]="['/logs', lastLogId]"
                 routerLinkActive="active"
@@ -91,6 +103,7 @@ import { NotificationService } from '../../services/notification.service';
               >
                 Log #{{ lastLogId.slice(0, 8) }}
               </a>
+              }
             }
 
             <div class="nav-divider"></div>
