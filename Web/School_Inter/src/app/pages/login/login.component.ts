@@ -75,7 +75,7 @@ import { NormalizedApiError } from '../../types/api.types';
 
         <div class="auth-footer">
           <span>¿Aún no tienes cuenta de estudiante?</span>
-          <a routerLink="/register" class="link-strong">Regístrate e inscribe tus 3 materias</a>
+          <a routerLink="/register" class="link-strong">Regístrate</a>
         </div>
       </div>
     </div>

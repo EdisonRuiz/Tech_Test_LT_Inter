@@ -48,7 +48,7 @@ export class StudentService {
 
     return this.http
       .put<unknown>(`${API_BASE_URL}/api/students/${id}`, payload, { headers })
-      .pipe(map((res) => this.normalizeStudent(res, { fullName: payload.fullName, email: '', password: '', courseIds: payload.courseIds })));
+      .pipe(map((res) => this.normalizeStudent(res, { fullName: payload.fullName, email: '', courseIds: payload.courseIds })));
   }
 
   deleteStudent(id: string): Observable<void> {
@@ -67,7 +67,7 @@ export class StudentService {
     );
   }
 
-  private normalizeStudent(raw: unknown, fallback?: CreateStudentRequest): Student {
+  private normalizeStudent(raw: unknown, fallback?: Pick<Student, 'fullName' | 'email' | 'courseIds'>): Student {
     const unwrapped = this.unwrapObject(raw);
     const coursesRaw =
       (unwrapped['courses'] as unknown[]) ??
@@ -138,7 +138,7 @@ export class StudentService {
           unwrapped['Credits'] ??
           unwrapped['totalCredits'] ??
           unwrapped['TotalCredits'] ??
-          (courseIds.length || fallback?.courseIds.length || 0) * 3
+          (courseIds.length || fallback?.courseIds?.length || 0) * 3
       ),
       courseIds: courseIds.length > 0 ? courseIds : fallback?.courseIds ?? [],
       courses,

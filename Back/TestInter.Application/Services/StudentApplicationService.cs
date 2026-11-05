@@ -37,15 +37,7 @@ public sealed class StudentApplicationService : IStudentApplicationService
             throw new DomainException("Email is already registered.");
         }
 
-        var selectedCourses = await _courseRepository.GetByIdsAsync(request.CourseIds, cancellationToken);
-        if (selectedCourses.Count != request.CourseIds.Count)
-        {
-            throw new DomainException("One or more selected courses do not exist.");
-        }
-
-        var student = new Student(Guid.NewGuid(), request.FullName, new EmailAddress(request.Email), _passwordHasher.Hash(request.Password));
-        student.ReplaceEnrollments(selectedCourses);
-
+        var student = new Student(Guid.NewGuid(), request.FullName, new EmailAddress(request.Email), _passwordHasher.Hash(request.Password)); 
         await _studentRepository.AddAsync(student, cancellationToken);
         return ToDto(student);
     }
@@ -143,8 +135,7 @@ public sealed class StudentApplicationService : IStudentApplicationService
     private static StudentDto ToDto(Student student, bool maskEmail = false)
     {
         string email = maskEmail ? MaskEmail(student.Email.Value) : student.Email.Value;
-        Guid id = maskEmail? Guid.Empty : student.Id; // If masking email, we also mask the ID for privacy
-        return new StudentDto(id, student.FullName, email);
+        return new StudentDto(student.Id, student.FullName, email);
     }
 
     public static string MaskEmail(string email)

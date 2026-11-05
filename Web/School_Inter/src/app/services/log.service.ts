@@ -59,7 +59,7 @@ export class LogService {
           payload['exception'] ??
           payload['Exception'] ??
           ''
-      ),
+      ) || this.extractContentMessages(payload['content']),
       stackTrace: (payload['stackTrace'] ?? payload['StackTrace']) as string | undefined,
       path: (payload['path'] ?? payload['Path'] ?? payload['endpoint'] ?? payload['Endpoint']) as
         | string
@@ -70,5 +70,43 @@ export class LogService {
           ? Number(payload['statusCode'] ?? payload['StatusCode'])
           : undefined,
     };
+  }
+
+  private extractContentMessages(content: unknown): string {
+    if (typeof content !== 'string') {
+      return '';
+    }
+
+    const messages: string[] = [];
+    let section = '';
+
+    for (const line of content.split(/\r?\n/)) {
+      const messageHeader = /^Message:[ \t]*(.*)$/.exec(line);
+      const stackHeader = /^StackTrace:[ \t]*(.*)$/.exec(line);
+
+      if (messageHeader) {
+        section = 'message';
+        if (messageHeader[1].trim()) {
+          messages.push(messageHeader[1].trim());
+        }
+        continue;
+      }
+
+      if (stackHeader) {
+        section = 'stack';
+      }
+
+      const text = (stackHeader ? stackHeader[1] : line).trim();
+      if (section === 'stack') {
+        const exceptionMessage = /^(?:--->\s*)?[\w.+`]+(?:Exception|Error):\s*(.+)$/.exec(text);
+        if (exceptionMessage) {
+          messages.push(exceptionMessage[1].trim());
+        }
+      } else if (section === 'message' && text) {
+        messages.push(text);
+      }
+    }
+
+    return messages.join('\n');
   }
 }

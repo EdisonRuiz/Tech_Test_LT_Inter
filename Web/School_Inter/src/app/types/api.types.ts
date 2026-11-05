@@ -41,7 +41,6 @@ export interface CreateStudentRequest {
   fullName: string;
   email: string;
   password: string;
-  courseIds: string[];
 }
 
 export interface UpdateStudentRequest {

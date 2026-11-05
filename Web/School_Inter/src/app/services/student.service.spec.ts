@@ -25,6 +25,28 @@ describe('StudentService', () => {
     httpTesting.verify();
   });
 
+  it('creates a student without sending course IDs', () => {
+    const payload = { fullName: 'Ana Perez', email: 'ana@campus.edu', password: 'secret123' };
+    let student;
+    service.createStudent(payload).subscribe((result) => {
+      student = result;
+    });
+
+    const request = httpTesting.expectOne(`${API_BASE_URL}/api/students`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    expect(request.request.body).not.toHaveProperty('courseIds');
+    request.flush({ id: 'student-1' });
+
+    expect(student).toMatchObject({
+      id: 'student-1',
+      fullName: payload.fullName,
+      email: payload.email,
+      courseIds: [],
+      credits: 0,
+    });
+  });
+
   it.each(['teacherFullName', 'TeacherFullName', 'professorName'])(
     'maps %s from the API to the professor name displayed by the page',
     (property) => {

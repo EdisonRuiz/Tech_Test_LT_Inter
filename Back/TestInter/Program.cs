@@ -82,7 +82,7 @@ apiGroup.MapGet("/courses", async (ICourseRepository courseRepository, ITeacherR
     return Results.Ok(response);
 });
 
-var studentGroup = apiGroup.MapGroup("/students");
+var studentGroup = apiGroup.MapGroup("/students").AllowAnonymous();
 
 studentGroup.MapPost(string.Empty, async (CreateStudentRequestDto request, IStudentApplicationService service, CancellationToken cancellationToken) =>
 {

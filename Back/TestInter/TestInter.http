@@ -17,23 +17,6 @@ GET {{TestInter_HostAddress}}/api/courses
 Authorization: Bearer {{token}}
 Accept: application/json
 
-
-### Create student registration (exactly 3 courses, different teachers)
-POST {{TestInter_HostAddress}}/api/students
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "fullName": "John Carter",
-  "email": "john.carter@school.com",
-  "password": "Pass123!",
-  "courseIds": [
-    "20000000-0000-0000-0000-000000000002",
-    "20000000-0000-0000-0000-000000000003",
-    "20000000-0000-0000-0000-000000000005"
-  ]
-}
-
 # Set @createdStudentId manually with the returned id before calling requests that use /api/students/{{createdStudentId}}.
 ### List students
 GET {{TestInter_HostAddress}}/api/students
@@ -73,19 +56,14 @@ Accept: application/json
 DELETE {{TestInter_HostAddress}}/api/students/{{createdStudentId}}
 Authorization: Bearer {{token}}
 
-### Invalid registration to force domain exception (2 courses)
+### Create student registration
 POST {{TestInter_HostAddress}}/api/students
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4NjY5YWY2OS0wODQyLTQ1NjEtODU3OS02YjhkZTdmOTMxOWIiLCJlbWFpbCI6InN0dWRlbnQxQHNjaG9vbC5jb20iLCJuYW1lIjoiQ2FybG9zIEFtcGFybyIsImV4cCI6MTc5MzgzMDQwMCwiaXNzIjoiVGVzdEludGVyLkFwaSIsImF1ZCI6IlRlc3RJbnRlci5DbGllbnQifQ.PI7hcFVgCOsLaFz60I1dZuU6YqU02T1yCEAaDRLY_Ec
 Content-Type: application/json
 
 {
-  "fullName": "Invalid Student",
-  "email": "invalid.student@school.com",
-  "password": "Pass123!",
-  "courseIds": [
-    "20000000-0000-0000-0000-000000000001",
-    "20000000-0000-0000-0000-000000000003"
-  ]
+  "fullName": "Carolina Guitierrez",
+  "email": "student6@school.com",
+  "password": "Pass123!"
 }
 
 ### Read log by logId from previous error response
