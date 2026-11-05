@@ -8,7 +8,7 @@ public sealed class SchoolDbContextFactory : IDesignTimeDbContextFactory<SchoolD
     public SchoolDbContext CreateDbContext(string[] args)
     {
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__SqlServer")
-            ?? "Server=(localdb)\\MSSQLLocalDB;Database=TestInterDb;Trusted_Connection=True;TrustServerCertificate=True";
+            ?? throw new InvalidOperationException("Connection string 'ConnectionStrings__SqlServer' not found.");
 
         var optionsBuilder = new DbContextOptionsBuilder<SchoolDbContext>();
         optionsBuilder.UseSqlServer(connectionString);

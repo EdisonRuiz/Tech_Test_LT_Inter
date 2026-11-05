@@ -30,16 +30,8 @@ public sealed class StudentRepository : IStudentRepository
     public async Task<Student?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         var normalizedEmail = email.Trim().ToLowerInvariant();
-        try
-        {
-            return await _dbContext.Students
+        return await _dbContext.Students
             .FirstOrDefaultAsync(student => student.Email.Value == normalizedEmail, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
-        
     }
 
     public async Task<IReadOnlyCollection<Student>> ListAsync(CancellationToken cancellationToken = default)

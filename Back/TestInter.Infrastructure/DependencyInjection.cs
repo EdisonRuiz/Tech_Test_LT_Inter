@@ -23,9 +23,7 @@ public static class DependencyInjection
 
         var connectionString = configuration.GetConnectionString("SqlServer");
         if (string.IsNullOrWhiteSpace(connectionString))
-        {
             throw new InvalidOperationException("Connection string 'SqlServer' is required.");
-        }
 
         services.AddDbContext<SchoolDbContext>(options => options.UseSqlServer(connectionString));
 
