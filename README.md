@@ -6,6 +6,17 @@ Documentación de la API **TestInter** (`.NET 10`), centrada en arquitectura.
 ---
 
 ## 1. Arquitectura
+                      [Estado Actual: Monolito Modular + DDD]
+                                          │
+                                          ▼
+                      [Fase 0: Optimización Híbrida del Monolito]
+                                          │
+                     ┌────────────────────┴────────────────────┐
+                     ▼                                         ▼
+    (Escenario A: Tráfico Masivo Continuo)    (Escenario B: Tráfico Alta Estacionalidad)
+                     │                                         │
+                     ▼                                         ▼
+    [Fase 1: Arquitectura CQRS + EDA]        [Fase 2: Arquitectura Serverless Event-Driven]
 
 El proyecto implementa **Clean Architecture (Arquitectura Limpia)** combinada con principios tácticos de **Domain-Driven Design (DDD)** sobre **.NET 10**, utilizando **Minimal APIs** y **Entity Framework Core (SQL Server)**.
 
